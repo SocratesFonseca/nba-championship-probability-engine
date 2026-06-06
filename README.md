@@ -47,6 +47,12 @@ python -m app.scripts.train_baseline
 
 The model trains through `2006-07`, validates on `2007-08` through `2010-11`, and uses `2011-12` onward as the final test period. Model artifacts are written to the ignored `backend/outputs` directory.
 
+Prediction API:
+
+- `GET /models/status` reports model availability and metadata.
+- `GET /predictions/latest` returns the latest processed historical season.
+- `GET /predictions/{season}` returns ranked probabilities for a season such as `2023-24`.
+
 ## Run It Locally
 
 Backend:

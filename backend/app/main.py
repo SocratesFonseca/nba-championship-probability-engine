@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.data import router as data_router
 from app.api.health import router as health_router
+from app.api.predictions import router as predictions_router
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.logging import configure_logging
@@ -35,3 +36,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(data_router)
+app.include_router(predictions_router)
