@@ -7,10 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.api.data import router as data_router
 from app.api.health import router as health_router
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.logging import configure_logging
+from app.models.dataset_import import DatasetFileMetadata, DatasetImport
 from app.models.team_prediction import TeamPrediction
 
 configure_logging()
@@ -35,3 +37,4 @@ def on_startup() -> None:
 
 
 app.include_router(health_router)
+app.include_router(data_router)

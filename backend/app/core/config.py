@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,12 +8,24 @@ class Settings(BaseSettings):
     database_url: str | None = None
     frontend_url: str = "http://localhost:5173"
     environment: str = "development"
+    nba_data_dir: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property
     def resolved_database_url(self) -> str:
         return self.database_url or "sqlite:///nba_local.db"
+
+    @property
+    def resolved_nba_data_dir(self) -> Path:
+        if self.nba_data_dir:
+            return Path(self.nba_data_dir).expanduser()
+
+        return Path(__file__).resolve().parents[2] / "data" / "raw"
+
+    @property
+    def is_data_dir_configured(self) -> bool:
+        return self.nba_data_dir is not None
 
     @property
     def is_production(self) -> bool:

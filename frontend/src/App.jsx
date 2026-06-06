@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { getHealth } from "./api";
+import { getDataStatus, getHealth } from "./api";
 import "./styles.css";
 
 const navigationItems = ["Overview", "Predictions", "Models", "Data", "Roadmap"];
 
-const pipelineItems = [
+const fallbackPipelineItems = [
   {
     label: "Historical data ingestion",
-    status: "Planned",
-    detail: "Connect source data and schedule repeatable imports.",
+    status: "Checking",
+    detail: "Waiting for backend data status.",
   },
   {
     label: "Feature engineering",
@@ -33,15 +33,51 @@ const roadmapItems = [
 function getStatusTone(status) {
   const normalized = status.toLowerCase();
 
-  if (normalized.includes("unavailable")) {
+  if (normalized.includes("unavailable") || normalized.includes("missing")) {
     return "danger";
   }
 
-  if (normalized.includes("checking")) {
+  if (normalized.includes("checking") || normalized.includes("planned") || normalized.includes("waiting") || normalized.includes("not imported")) {
     return "pending";
   }
 
-  return "success";
+  if (normalized.includes("ready") || normalized.includes("imported") || normalized.includes("ok")) {
+    return "success";
+  }
+
+  return "neutral";
+}
+
+function getPipelineItems(dataStatus) {
+  if (!dataStatus) {
+    return fallbackPipelineItems;
+  }
+
+  const ingestionStatus = dataStatus.database_has_import_metadata
+    ? "Imported"
+    : dataStatus.files_valid
+      ? "Ready to import"
+      : "Not imported";
+
+  const ingestionDetail = dataStatus.messages?.[0] || "Download the Kaggle CSV files and run the backend ingestion command.";
+
+  return [
+    {
+      label: "Kaggle dataset files",
+      status: dataStatus.files_valid ? "Ready" : dataStatus.data_dir_exists ? "Missing files" : "Directory missing",
+      detail: `${dataStatus.present_files?.length || 0} of ${dataStatus.expected_files?.length || 0} expected files found.`,
+    },
+    {
+      label: "Dataset metadata import",
+      status: ingestionStatus,
+      detail: dataStatus.last_imported_at ? `Last imported ${new Date(dataStatus.last_imported_at).toLocaleString()}.` : ingestionDetail,
+    },
+    {
+      label: "Model training",
+      status: "Not started",
+      detail: "Training will begin after raw stats tables and feature engineering are implemented.",
+    },
+  ];
 }
 
 function StatusPill({ label, tone = "neutral" }) {
@@ -81,6 +117,8 @@ function EmptyState({ title, description }) {
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking...");
+  const [dataStatus, setDataStatus] = useState(null);
+  const [dataStatusLabel, setDataStatusLabel] = useState("Checking...");
 
   useEffect(() => {
     let isMounted = true;
@@ -97,12 +135,27 @@ function App() {
         }
       });
 
+    getDataStatus()
+      .then((data) => {
+        if (isMounted) {
+          setDataStatus(data);
+          setDataStatusLabel(data.database_has_import_metadata ? "Imported" : "Not imported yet");
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setDataStatusLabel("Unavailable");
+        }
+      });
+
     return () => {
       isMounted = false;
     };
   }, []);
 
   const backendTone = useMemo(() => getStatusTone(backendStatus), [backendStatus]);
+  const dataTone = useMemo(() => getStatusTone(dataStatusLabel), [dataStatusLabel]);
+  const pipelineItems = useMemo(() => getPipelineItems(dataStatus), [dataStatus]);
 
   return (
     <div className="app-shell">
@@ -139,6 +192,7 @@ function App() {
                 </p>
                 <div className="overview-actions">
                   <StatusPill label="Prediction data pending" tone="pending" />
+                  <StatusPill label={`Data ${dataStatusLabel.toLowerCase()}`} tone={dataTone} />
                   <StatusPill label="Backend health enabled" tone={backendTone} />
                 </div>
               </div>
@@ -149,7 +203,7 @@ function App() {
                 </div>
                 <div>
                   <span>Data ingestion</span>
-                  <strong>Planned</strong>
+                  <strong>{dataStatusLabel}</strong>
                 </div>
                 <div>
                   <span>Model outputs</span>
@@ -193,7 +247,7 @@ function App() {
                     <h3>{item.label}</h3>
                     <p>{item.detail}</p>
                   </div>
-                  <StatusPill label={item.status} tone={item.status === "Planned" ? "pending" : "neutral"} />
+                  <StatusPill label={item.status} tone={getStatusTone(item.status)} />
                 </div>
               ))}
             </div>
