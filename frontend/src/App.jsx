@@ -1,7 +1,83 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { getHealth } from "./api";
 import "./styles.css";
+
+const navigationItems = ["Overview", "Predictions", "Models", "Data", "Roadmap"];
+
+const pipelineItems = [
+  {
+    label: "Historical data ingestion",
+    status: "Planned",
+    detail: "Connect source data and schedule repeatable imports.",
+  },
+  {
+    label: "Feature engineering",
+    status: "Not started",
+    detail: "Create training-ready team, season, and playoff features.",
+  },
+  {
+    label: "Model training",
+    status: "Not started",
+    detail: "Train and evaluate the first championship probability model.",
+  },
+];
+
+const roadmapItems = [
+  "Build data ingestion workflow",
+  "Add model training pipeline",
+  "Store prediction outputs",
+  "Connect dashboard visualizations to real data",
+];
+
+function getStatusTone(status) {
+  const normalized = status.toLowerCase();
+
+  if (normalized.includes("unavailable")) {
+    return "danger";
+  }
+
+  if (normalized.includes("checking")) {
+    return "pending";
+  }
+
+  return "success";
+}
+
+function StatusPill({ label, tone = "neutral" }) {
+  return <span className={`status-pill status-pill--${tone}`}>{label}</span>;
+}
+
+function DashboardCard({ title, eyebrow, children, action }) {
+  return (
+    <section className="dashboard-card">
+      <div className="card-header">
+        <div>
+          {eyebrow ? <p className="card-eyebrow">{eyebrow}</p> : null}
+          <h2>{title}</h2>
+        </div>
+        {action ? <div className="card-action">{action}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyState({ title, description }) {
+  return (
+    <div className="empty-state">
+      <div className="empty-state__surface" aria-hidden="true">
+        <div className="empty-state__line empty-state__line--wide" />
+        <div className="empty-state__line" />
+        <div className="empty-state__line empty-state__line--short" />
+      </div>
+      <div>
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking...");
@@ -26,21 +102,113 @@ function App() {
     };
   }, []);
 
-  return (
-    <main className="app-shell">
-      <section className="intro">
-        <p className="eyebrow">Project foundation</p>
-        <h1>NBA Championship Probability Engine</h1>
-        <p className="subtitle">
-          Machine learning forecasts built from historical NBA data.
-        </p>
-      </section>
+  const backendTone = useMemo(() => getStatusTone(backendStatus), [backendStatus]);
 
-      <section className="status-panel" aria-label="Backend status">
-        <span className="status-label">Backend Status:</span>
-        <span className="status-value">{backendStatus}</span>
-      </section>
-    </main>
+  return (
+    <div className="app-shell">
+      <aside className="sidebar" aria-label="Main navigation">
+        <div className="brand-mark">NBA</div>
+        <nav className="nav-list">
+          {navigationItems.map((item) => (
+            <a className={item === "Overview" ? "nav-item nav-item--active" : "nav-item"} href={`#${item.toLowerCase()}`} key={item}>
+              {item}
+            </a>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="workspace">
+        <header className="top-header">
+          <div>
+            <p className="eyebrow">Analytics dashboard</p>
+            <h1>NBA Championship Probability Engine</h1>
+            <p className="subtitle">Machine learning forecasts built from historical NBA data.</p>
+          </div>
+          <div className="health-card" aria-label="Backend status">
+            <span className="health-label">Backend</span>
+            <StatusPill label={backendStatus} tone={backendTone} />
+          </div>
+        </header>
+
+        <main className="dashboard-grid">
+          <DashboardCard title="Overview" eyebrow="Project state">
+            <div className="overview-layout">
+              <div>
+                <p className="body-copy">
+                  The dashboard shell is ready for real NBA data, model outputs, and prediction history once ingestion and training are implemented.
+                </p>
+                <div className="overview-actions">
+                  <StatusPill label="Prediction data pending" tone="pending" />
+                  <StatusPill label="Backend health enabled" tone={backendTone} />
+                </div>
+              </div>
+              <div className="readiness-list" aria-label="Readiness summary">
+                <div>
+                  <span>Interface</span>
+                  <strong>Ready</strong>
+                </div>
+                <div>
+                  <span>Data ingestion</span>
+                  <strong>Planned</strong>
+                </div>
+                <div>
+                  <span>Model outputs</span>
+                  <strong>Pending</strong>
+                </div>
+              </div>
+            </div>
+          </DashboardCard>
+
+          <DashboardCard title="Prediction Workspace" eyebrow="Future outputs">
+            <EmptyState
+              title="No prediction data available yet"
+              description="Championship probabilities will appear here after historical data ingestion, model training, and output storage are added."
+            />
+          </DashboardCard>
+
+          <DashboardCard title="Model Status" eyebrow="Training">
+            <div className="status-list">
+              <div className="status-row">
+                <div>
+                  <h3>Baseline model</h3>
+                  <p>No model has been trained yet.</p>
+                </div>
+                <StatusPill label="Not started" tone="neutral" />
+              </div>
+              <div className="status-row">
+                <div>
+                  <h3>Evaluation metrics</h3>
+                  <p>Metrics will be shown after the first training run.</p>
+                </div>
+                <StatusPill label="Waiting" tone="pending" />
+              </div>
+            </div>
+          </DashboardCard>
+
+          <DashboardCard title="Data Pipeline Status" eyebrow="Data readiness">
+            <div className="pipeline-list">
+              {pipelineItems.map((item) => (
+                <div className="pipeline-item" key={item.label}>
+                  <div>
+                    <h3>{item.label}</h3>
+                    <p>{item.detail}</p>
+                  </div>
+                  <StatusPill label={item.status} tone={item.status === "Planned" ? "pending" : "neutral"} />
+                </div>
+              ))}
+            </div>
+          </DashboardCard>
+
+          <DashboardCard title="Roadmap Progress" eyebrow="Next milestones">
+            <ol className="roadmap-list">
+              {roadmapItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </DashboardCard>
+        </main>
+      </div>
+    </div>
   );
 }
 
