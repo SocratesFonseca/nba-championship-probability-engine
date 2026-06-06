@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -28,7 +28,11 @@ class DatasetFileMetadata(Base):
     __tablename__ = "dataset_file_metadata"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    import_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    import_id: Mapped[int] = mapped_column(
+        ForeignKey("dataset_imports.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     filename: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     row_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     column_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

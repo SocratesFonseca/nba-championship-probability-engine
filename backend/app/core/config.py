@@ -14,7 +14,11 @@ class Settings(BaseSettings):
 
     @property
     def resolved_database_url(self) -> str:
-        return self.database_url or "sqlite:///nba_local.db"
+        database_url = self.database_url or "sqlite:///nba_local.db"
+        if database_url.startswith("postgres://"):
+            return database_url.replace("postgres://", "postgresql://", 1)
+
+        return database_url
 
     @property
     def resolved_nba_data_dir(self) -> Path:

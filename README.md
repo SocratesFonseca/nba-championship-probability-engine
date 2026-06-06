@@ -1,10 +1,27 @@
 # NBA Championship Probability Engine
 
-A simple project for estimating NBA championship probabilities.
+A full-stack foundation for an NBA championship probability project.
 
 ## What It Does
 
-This app has a FastAPI backend and a React frontend. It is set up for future NBA data ingestion and model training, but it does not include predictions yet.
+This app has a FastAPI backend and a React frontend. It validates downloaded Kaggle CSV files, stores import metadata in a database, and reports backend and dataset status to the dashboard. It does not include predictions yet.
+
+## Tech Stack
+
+- React and Vite
+- FastAPI
+- SQLAlchemy
+- SQLite for local development
+- PostgreSQL through `DATABASE_URL`
+- Docker Compose
+
+## Current Features
+
+- Responsive dashboard with backend and dataset status
+- FastAPI health and data status endpoints
+- Configurable Kaggle CSV validation
+- Dataset import metadata stored in SQLite or PostgreSQL
+- Focused backend tests
 
 ## Dataset
 
@@ -27,6 +44,8 @@ Backend:
 
 ```bash
 cd backend
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
@@ -43,6 +62,14 @@ Docker:
 
 ```bash
 docker compose up --build
+```
+
+Run backend tests:
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
 ```
 
 ## Deployment Notes
