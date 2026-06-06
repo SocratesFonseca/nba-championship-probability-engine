@@ -312,6 +312,10 @@ def build_team_season_rows(
                 f"{', '.join(missing)}"
             )
 
+        result = str(source_row["WL"] or "").upper()
+        if not result and float(source_row["PTS"] or 0) == 0:
+            continue
+
         try:
             team_id = int(source_row["TEAM_ID"])
             game_id = str(source_row["GAME_ID"])
@@ -342,7 +346,6 @@ def build_team_season_rows(
             },
         )
         team["gp"] += 1
-        result = str(source_row["WL"]).upper()
         if result == "W":
             team["wins"] += 1
         elif result == "L":
@@ -478,6 +481,7 @@ def write_training_dataset(
         "league_scope": "NBA only (League ID 00); ABA and BAA are not exposed by this workflow.",
         "default_split_policy": "1984-85 through 2010-11 for training; 2011-12 and later reserved for future evaluation.",
         "champion_method": "Winner of the season's final game in the separate playoff game log response.",
+        "unplayed_game_policy": "Rows with a blank WL value and zero points are excluded as unplayed or canceled games.",
         "validation_results": validations,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     nba_data_dir: str | None = None
     nba_api_raw_dir: str | None = None
     nba_processed_dir: str | None = None
+    nba_model_output_dir: str | None = None
     nba_api_timeout_seconds: int = 30
     nba_api_request_delay_seconds: float = 1.0
     nba_api_max_retries: int = 3
@@ -49,6 +50,13 @@ class Settings(BaseSettings):
             return Path(self.nba_processed_dir).expanduser()
 
         return Path(__file__).resolve().parents[2] / "data" / "processed"
+
+    @property
+    def resolved_nba_model_output_dir(self) -> Path:
+        if self.nba_model_output_dir:
+            return Path(self.nba_model_output_dir).expanduser()
+
+        return Path(__file__).resolve().parents[2] / "outputs"
 
     @property
     def is_production(self) -> bool:

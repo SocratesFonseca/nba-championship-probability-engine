@@ -63,6 +63,7 @@ class FakeClient:
                 regular_game(2, "Team Two", "1", "L", 108),
                 regular_game(1, "Team One", "2", "L", 101),
                 regular_game(2, "Team Two", "2", "W", 109),
+                regular_game(1, "Team One", "3", "", 0),
             ]
         )
 
