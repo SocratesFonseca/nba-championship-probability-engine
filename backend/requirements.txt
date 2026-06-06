@@ -4,3 +4,4 @@ SQLAlchemy==2.0.50
 psycopg2-binary==2.9.12
 pydantic-settings==2.7.1
 python-dotenv==1.0.1
+nba_api==1.11.4

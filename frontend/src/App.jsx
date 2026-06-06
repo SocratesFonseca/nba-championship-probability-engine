@@ -53,24 +53,22 @@ function getPipelineItems(dataStatus) {
     return fallbackPipelineItems;
   }
 
-  const ingestionStatus = dataStatus.database_has_import_metadata
-    ? "Imported"
-    : dataStatus.files_valid
-      ? "Ready to import"
-      : "Not imported";
+  const ingestionStatus = dataStatus.training_dataset_available
+    ? "Ready"
+    : "Not collected";
 
-  const ingestionDetail = dataStatus.messages?.[0] || "Download the Kaggle CSV files and run the backend ingestion command.";
+  const ingestionDetail = dataStatus.messages?.[0] || "Run the NBA API collection command.";
 
   return [
     {
-      label: "Kaggle dataset files",
-      status: dataStatus.files_valid ? "Ready" : dataStatus.data_dir_exists ? "Missing files" : "Directory missing",
-      detail: `${dataStatus.present_files?.length || 0} of ${dataStatus.expected_files?.length || 0} expected files found.`,
+      label: "NBA API cache",
+      status: dataStatus.raw_cache_files > 0 ? "Available" : "Not collected",
+      detail: `${dataStatus.raw_cache_files || 0} cached API responses available.`,
     },
     {
-      label: "Dataset metadata import",
+      label: "Training dataset",
       status: ingestionStatus,
-      detail: dataStatus.last_imported_at ? `Last imported ${new Date(dataStatus.last_imported_at).toLocaleString()}.` : ingestionDetail,
+      detail: dataStatus.last_generated_at ? `Last generated ${new Date(dataStatus.last_generated_at).toLocaleString()}.` : ingestionDetail,
     },
     {
       label: "Model training",
@@ -139,7 +137,7 @@ function App() {
       .then((data) => {
         if (isMounted) {
           setDataStatus(data);
-          setDataStatusLabel(data.database_has_import_metadata ? "Imported" : "Not imported yet");
+          setDataStatusLabel(data.training_dataset_available ? "Ready" : "Not collected yet");
         }
       })
       .catch(() => {

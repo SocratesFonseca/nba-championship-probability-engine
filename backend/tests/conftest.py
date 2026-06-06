@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -7,9 +8,13 @@ from sqlalchemy import delete
 
 TEST_DATABASE_PATH = Path(__file__).resolve().parent / "test_nba.db"
 DEFAULT_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
+TEST_RAW_DIR = Path(__file__).resolve().parent / "test_raw"
+TEST_PROCESSED_DIR = Path(__file__).resolve().parent / "test_processed"
 
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DATABASE_PATH.as_posix()}"
 os.environ["NBA_DATA_DIR"] = str(DEFAULT_DATA_DIR)
+os.environ["NBA_API_RAW_DIR"] = str(TEST_RAW_DIR)
+os.environ["NBA_PROCESSED_DIR"] = str(TEST_PROCESSED_DIR)
 os.environ["ENVIRONMENT"] = "test"
 
 from app.core.database import Base, SessionLocal, engine
@@ -37,3 +42,5 @@ def client():
 def pytest_sessionfinish(session, exitstatus):
     engine.dispose()
     TEST_DATABASE_PATH.unlink(missing_ok=True)
+    shutil.rmtree(TEST_RAW_DIR, ignore_errors=True)
+    shutil.rmtree(TEST_PROCESSED_DIR, ignore_errors=True)

@@ -4,7 +4,7 @@ A full-stack foundation for an NBA championship probability project.
 
 ## What It Does
 
-This app has a FastAPI backend and a React frontend. It validates downloaded Kaggle CSV files, stores import metadata in a database, and reports backend and dataset status to the dashboard. It does not include predictions yet.
+This app has a FastAPI backend and a React frontend. It collects NBA team-season statistics, builds a validated training table, and reports backend and dataset status to the dashboard. It does not include predictions yet.
 
 ## Tech Stack
 
@@ -19,24 +19,24 @@ This app has a FastAPI backend and a React frontend. It validates downloaded Kag
 
 - Responsive dashboard with backend and dataset status
 - FastAPI health and data status endpoints
-- Configurable Kaggle CSV validation
-- Dataset import metadata stored in SQLite or PostgreSQL
+- Cached and resumable NBA.com data collection through `nba_api`
+- Validated team-season training CSV with a champion target
 - Focused backend tests
 
 ## Dataset
 
-This project is intended to use the Kaggle NBA/ABA/BAA stats dataset:
+The primary data workflow uses NBA.com statistics through the Python `nba_api` package. It collects regular-season team statistics and uses a separate playoff response to identify each season's champion.
 
-https://www.kaggle.com/datasets/sumitrodatta/nba-aba-baa-stats
-
-Raw CSV files are not committed to GitHub. Download the dataset yourself, put the CSV files in `backend/data/raw`, then import dataset metadata into the database.
+Raw API responses and processed datasets are not committed to GitHub.
 
 ```bash
 cd backend
-python scripts/ingest_kaggle_dataset.py
+python -m app.scripts.collect_nba_data
 ```
 
-You can also set `NBA_DATA_DIR` if the CSV files are somewhere else.
+The default range is `1984-85` through `2010-11`. Seasons from `2011-12` onward are left available for future model evaluation. You can override the range with `--start-season` and `--end-season`.
+
+The older Kaggle metadata command remains optional at `python scripts/ingest_kaggle_dataset.py`.
 
 ## Run It Locally
 
@@ -84,9 +84,11 @@ Environment variables:
 - `FRONTEND_URL` for the deployed frontend URL
 - `ENVIRONMENT=production` in production
 - `NBA_DATA_DIR` if raw CSV files are not in `backend/data/raw`
+- `NBA_API_RAW_DIR` to override the raw API cache directory
+- `NBA_PROCESSED_DIR` to override the processed dataset directory
 
 Do not put database credentials, Kaggle keys, or private values in frontend `VITE_` variables.
 
 ## Status
 
-This is still a work in progress. The current data import only stores dataset metadata, not full stats tables or predictions.
+This is still a work in progress. Model training and predictions are not implemented.

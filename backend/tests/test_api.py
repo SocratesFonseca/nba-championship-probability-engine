@@ -10,8 +10,8 @@ def test_data_status_endpoint_without_downloaded_files(client):
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["data_dir_exists"] is True
-    assert payload["database_has_import_metadata"] is False
-    assert payload["files_valid"] is False
-    assert payload["missing_files"]
-    assert payload["last_imported_at"] is None
+    assert payload["workflow"] == "nba_api"
+    assert payload["training_dataset_available"] is False
+    assert payload["metadata_available"] is False
+    assert payload["raw_cache_files"] == 0
+    assert payload["last_generated_at"] is None
