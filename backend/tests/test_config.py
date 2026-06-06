@@ -16,3 +16,13 @@ def test_railway_postgres_url_is_normalized():
     )
 
     assert settings.resolved_database_url.startswith("postgresql://")
+
+
+def test_production_cors_uses_only_normalized_frontend_url():
+    settings = Settings(
+        frontend_url="https://nba.example.com/",
+        environment="production",
+        _env_file=None,
+    )
+
+    assert settings.cors_origins == ["https://nba.example.com"]

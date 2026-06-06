@@ -10,7 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY scripts ./scripts
-COPY data ./data
+COPY runtime_artifacts ./runtime_artifacts
+
+RUN mkdir -p data/raw data/processed outputs logs
+
+ENV NBA_MODEL_OUTPUT_DIR=/app/runtime_artifacts
+ENV NBA_PREDICTION_DATA_PATH=/app/runtime_artifacts/prediction_features.csv
 
 EXPOSE 8000
 

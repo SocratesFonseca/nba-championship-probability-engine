@@ -15,3 +15,5 @@ def test_data_status_endpoint_without_downloaded_files(client):
     assert payload["metadata_available"] is False
     assert payload["raw_cache_files"] == 0
     assert payload["last_generated_at"] is None
+    assert "raw_data_dir" not in payload
+    assert "processed_data_dir" not in payload

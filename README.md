@@ -1,109 +1,81 @@
 # NBA Championship Probability Engine
 
-A full-stack foundation for an NBA championship probability project.
+A React and FastAPI application that collects real NBA team-season data,
+evaluates a logistic regression baseline, and serves historical championship
+probabilities through an API and dashboard.
 
-## What It Does
-
-This app has a FastAPI backend and a React frontend. It collects NBA team-season statistics, builds a validated training table, and evaluates a logistic regression championship baseline on unseen seasons.
-
-## Tech Stack
+## Technology
 
 - React and Vite
-- FastAPI
-- SQLAlchemy
-- SQLite for local development
-- PostgreSQL through `DATABASE_URL`
+- FastAPI and SQLAlchemy
+- scikit-learn
+- `nba_api`
+- SQLite locally and PostgreSQL through `DATABASE_URL`
 - Docker Compose
 
-## Current Features
+## Model
 
-- Responsive dashboard with backend and dataset status
-- FastAPI health and data status endpoints
-- Cached and resumable NBA.com data collection through `nba_api`
-- Validated team-season training CSV with a champion target
-- Chronological logistic regression baseline with held-out evaluation
-- Focused backend tests
+The baseline uses regular-season statistics only. It trains on 1984-85 through
+2006-07, validates on 2007-08 through 2010-11, and tests on 2011-12 through
+2024-25.
 
-## Dataset
+Final test results:
 
-The primary data workflow uses NBA.com statistics through the Python `nba_api` package. It collects regular-season team statistics and uses a separate playoff response to identify each season's champion.
+- Log loss: 1.740
+- Brier score: 0.767
+- Top-1 champion accuracy: 50.0%
+- Top-3 champion inclusion: 85.7%
 
-Raw API responses and processed datasets are not committed to GitHub.
+These are historical holdout results, not future guarantees or betting advice.
 
-```bash
-cd backend
-python -m app.scripts.collect_nba_data
+## Run Locally
+
+```powershell
+docker compose up --build
 ```
 
-The default range is `1984-85` through `2010-11`. Seasons from `2011-12` onward are left available for future model evaluation. You can override the range with `--start-season` and `--end-season`.
+Or run each service:
 
-The older Kaggle metadata command remains optional at `python scripts/ingest_kaggle_dataset.py`.
-
-Train and evaluate the logistic regression baseline:
-
-```bash
-python -m app.scripts.train_baseline
-```
-
-The model trains through `2006-07`, validates on `2007-08` through `2010-11`, and uses `2011-12` onward as the final test period. Model artifacts are written to the ignored `backend/outputs` directory.
-
-Prediction API:
-
-- `GET /models/status` reports model availability and metadata.
-- `GET /predictions/latest` returns the latest processed historical season.
-- `GET /predictions/{season}` returns ranked probabilities for a season such as `2023-24`.
-
-## Run It Locally
-
-Backend:
-
-```bash
+```powershell
 cd backend
-python -m venv .venv
-.venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Frontend:
-
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-Docker:
+Backend tests:
 
-```bash
-docker compose up --build
-```
-
-Run backend tests:
-
-```bash
+```powershell
 cd backend
 pip install -r requirements-dev.txt
 pytest
 ```
 
-## Deployment Notes
+## Deployment
 
-Frontend: deploy the `frontend` folder to Vercel.
+Deploy `backend` to Railway and `frontend` to Vercel.
 
-Backend: deploy the `backend` folder to Railway and use a Railway PostgreSQL database.
+Railway variables:
 
-Environment variables:
+- `DATABASE_URL`
+- `FRONTEND_URL`
+- `ENVIRONMENT=production`
 
-- `DATABASE_URL` for PostgreSQL
-- `FRONTEND_URL` for the deployed frontend URL
-- `ENVIRONMENT=production` in production
-- `NBA_DATA_DIR` if raw CSV files are not in `backend/data/raw`
-- `NBA_API_RAW_DIR` to override the raw API cache directory
-- `NBA_PROCESSED_DIR` to override the processed dataset directory
+Vercel variable:
 
-Do not put database credentials, Kaggle keys, or private values in frontend `VITE_` variables.
+- `VITE_API_URL`
 
-## Status
+The backend Docker image includes only the small model and prediction files
+needed at runtime. Raw API responses, generated training datasets, databases,
+credentials, and local environment files are not committed.
 
-This is still a work in progress. The baseline is evaluated offline; predictions are not exposed through the API or dashboard.
+## Limitations
+
+Predictions cover completed historical seasons through 2024-25. The model uses
+a small regular-season feature set and does not account for injuries, roster
+changes, transactions, or in-season context.

@@ -44,6 +44,12 @@ backend/logs/*
 !backend/outputs/.gitkeep
 !backend/logs/.gitkeep
 
+!backend/runtime_artifacts/
+!backend/runtime_artifacts/logistic_baseline_pipeline.joblib
+!backend/runtime_artifacts/logistic_baseline_metadata.json
+!backend/runtime_artifacts/prediction_features.csv
+!backend/runtime_artifacts/README.md
+
 .vscode/
 .idea/
 .DS_Store

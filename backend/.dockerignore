@@ -1,0 +1,13 @@
+.env
+.env.*
+.venv
+__pycache__
+*.pyc
+*.db
+*.sqlite
+*.sqlite3
+data/raw
+data/processed
+outputs
+logs
+tests

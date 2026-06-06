@@ -17,6 +17,7 @@ os.environ["NBA_DATA_DIR"] = str(DEFAULT_DATA_DIR)
 os.environ["NBA_API_RAW_DIR"] = str(TEST_RAW_DIR)
 os.environ["NBA_PROCESSED_DIR"] = str(TEST_PROCESSED_DIR)
 os.environ["NBA_MODEL_OUTPUT_DIR"] = str(TEST_OUTPUT_DIR)
+os.environ.pop("NBA_PREDICTION_DATA_PATH", None)
 os.environ["ENVIRONMENT"] = "test"
 
 from app.core.database import Base, SessionLocal, engine

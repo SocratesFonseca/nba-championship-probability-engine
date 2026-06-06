@@ -131,7 +131,11 @@ def clear_prediction_caches() -> None:
     load_processed_data.cache_clear()
 
 
-def _dataset_paths() -> tuple[Path, Path]:
+def _dataset_paths() -> tuple[Path, ...]:
+    runtime_path = settings.resolved_nba_prediction_data_path
+    if runtime_path:
+        return (runtime_path,)
+
     processed_dir = settings.resolved_nba_processed_dir
     return (
         processed_dir / "team_season_training.csv",

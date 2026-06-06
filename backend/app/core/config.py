@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     nba_api_raw_dir: str | None = None
     nba_processed_dir: str | None = None
     nba_model_output_dir: str | None = None
+    nba_prediction_data_path: str | None = None
     nba_api_timeout_seconds: int = 30
     nba_api_request_delay_seconds: float = 1.0
     nba_api_max_retries: int = 3
@@ -59,13 +60,20 @@ class Settings(BaseSettings):
         return Path(__file__).resolve().parents[2] / "outputs"
 
     @property
+    def resolved_nba_prediction_data_path(self) -> Path | None:
+        if self.nba_prediction_data_path:
+            return Path(self.nba_prediction_data_path).expanduser()
+
+        return None
+
+    @property
     def is_production(self) -> bool:
         return self.environment.lower() == "production"
 
     @property
     def cors_origins(self) -> list[str]:
         if self.is_production:
-            return [self.frontend_url]
+            return [self.frontend_url.rstrip("/")]
 
         return ["http://localhost:5173"]
 

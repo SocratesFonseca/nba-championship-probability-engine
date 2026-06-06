@@ -1,0 +1,98 @@
+{
+  "model_version": "logistic-baseline-v1",
+  "model_type": "LogisticRegression",
+  "pipeline_steps": [
+    "median_imputation",
+    "standard_scaling",
+    "logistic_regression"
+  ],
+  "class_weight": "balanced",
+  "features": [
+    "gp",
+    "wins",
+    "losses",
+    "win_pct",
+    "fgm_per_game",
+    "fga_per_game",
+    "fg_pct",
+    "ftm_per_game",
+    "fta_per_game",
+    "ft_pct",
+    "pts_per_game"
+  ],
+  "excluded_leakage_fields": [
+    "champion",
+    "championship_indicators",
+    "finals_results",
+    "future_season",
+    "playoff_game_log",
+    "playoff_games",
+    "playoff_losses",
+    "playoff_results",
+    "playoff_wins",
+    "postseason_statistics",
+    "target_derived"
+  ],
+  "training_cutoff": "2006-07",
+  "splits": {
+    "training": {
+      "start": "1984-85",
+      "end": "2006-07",
+      "count": 23,
+      "row_count": 630
+    },
+    "validation": {
+      "start": "2007-08",
+      "end": "2010-11",
+      "count": 4,
+      "row_count": 120
+    },
+    "test": {
+      "start": "2011-12",
+      "end": "2024-25",
+      "count": 14,
+      "row_count": 420
+    }
+  },
+  "evaluation_metrics": {
+    "validation": {
+      "log_loss": 2.0634797223640646,
+      "brier_score": 0.8528408366609739,
+      "top_1_champion_accuracy": 0.25,
+      "top_3_champion_inclusion_rate": 0.5,
+      "average_champion_probability": 0.12885401262872193
+    },
+    "test": {
+      "log_loss": 1.7395742785849233,
+      "brier_score": 0.767423097768332,
+      "top_1_champion_accuracy": 0.5,
+      "top_3_champion_inclusion_rate": 0.8571428571428571,
+      "average_champion_probability": 0.18309168589493524
+    }
+  },
+  "win_pct_baseline_metrics": {
+    "validation": {
+      "log_loss": 3.0022333114686726,
+      "brier_score": 0.9372969132130345,
+      "top_1_champion_accuracy": 0.25,
+      "top_3_champion_inclusion_rate": 0.75,
+      "average_champion_probability": 0.04979674796747967
+    },
+    "test": {
+      "log_loss": 3.0205631464270466,
+      "brier_score": 0.9383733337540063,
+      "top_1_champion_accuracy": 0.42857142857142855,
+      "top_3_champion_inclusion_rate": 0.7857142857142857,
+      "average_champion_probability": 0.048966726026114286
+    }
+  },
+  "metric_definition": {
+    "log_loss": "Mean negative log probability assigned to the champion across seasons.",
+    "brier_score": "Mean per-season sum of squared probability errors across all teams.",
+    "top_1_champion_accuracy": "Share of seasons where the highest-probability team was champion.",
+    "top_3_champion_inclusion_rate": "Share of seasons where the champion ranked in the top three.",
+    "average_champion_probability": "Mean normalized probability assigned to the champion."
+  },
+  "probability_normalization": "Scores are nonnegative and normalized to sum to 1.0 within each season.",
+  "generated_at": "2026-06-06T22:23:42.519523+00:00"
+}

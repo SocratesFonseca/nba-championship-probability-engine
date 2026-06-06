@@ -547,8 +547,10 @@ def get_training_data_status() -> dict[str, Any]:
     processed_dir = settings.resolved_nba_processed_dir
     training_path = processed_dir / TRAINING_FILENAME
     metadata_path = processed_dir / METADATA_FILENAME
+    runtime_path = settings.resolved_nba_prediction_data_path
     raw_files = sorted(raw_dir.glob("*_game_log.json")) if raw_dir.exists() else []
     metadata: dict[str, Any] | None = None
+    runtime_summary: dict[str, Any] | None = None
     messages: list[str] = []
 
     if metadata_path.exists():
@@ -557,7 +559,24 @@ def get_training_data_status() -> dict[str, Any]:
         except (OSError, json.JSONDecodeError):
             messages.append("Training metadata exists but could not be read.")
 
-    if training_path.exists() and metadata:
+    if runtime_path and runtime_path.exists():
+        try:
+            with runtime_path.open(encoding="utf-8", newline="") as file:
+                rows = list(csv.DictReader(file))
+            seasons = sorted({row["season"] for row in rows if row.get("season")})
+            runtime_summary = {
+                "row_count": len(rows),
+                "season_range": {
+                    "start": seasons[0] if seasons else None,
+                    "end": seasons[-1] if seasons else None,
+                },
+            }
+        except (OSError, csv.Error, KeyError):
+            messages.append("Packaged prediction data exists but could not be read.")
+
+    if runtime_summary:
+        messages.append("Packaged prediction data is available.")
+    elif training_path.exists() and metadata:
         messages.append("Validated training dataset is available.")
     elif raw_files:
         messages.append(
@@ -571,13 +590,19 @@ def get_training_data_status() -> dict[str, Any]:
     return {
         "source_name": SOURCE_NAME,
         "workflow": "nba_api",
-        "raw_data_dir": str(raw_dir),
-        "processed_data_dir": str(processed_dir),
         "raw_cache_files": len(raw_files),
-        "training_dataset_available": training_path.exists(),
+        "training_dataset_available": training_path.exists() or runtime_summary is not None,
         "metadata_available": metadata is not None,
-        "row_count": metadata.get("row_count") if metadata else None,
-        "season_range": metadata.get("season_range") if metadata else None,
+        "row_count": (
+            metadata.get("row_count")
+            if metadata
+            else runtime_summary.get("row_count") if runtime_summary else None
+        ),
+        "season_range": (
+            metadata.get("season_range")
+            if metadata
+            else runtime_summary.get("season_range") if runtime_summary else None
+        ),
         "last_generated_at": metadata.get("generated_at") if metadata else None,
         "validation_results": (
             metadata.get("validation_results") if metadata else None
