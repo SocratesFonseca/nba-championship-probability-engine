@@ -4,6 +4,8 @@ A React and FastAPI application that collects real NBA team-season data,
 evaluates a logistic regression baseline, and serves historical championship
 probabilities through an API and dashboard.
 
+Live app: https://nba-championship-probability-engine.vercel.app
+
 ## Technology
 
 - React and Vite
