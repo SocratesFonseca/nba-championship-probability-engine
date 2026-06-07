@@ -1,42 +1,49 @@
 # NBA Championship Probability Engine
 
-A React and FastAPI application that collects real NBA team-season data,
-evaluates a logistic regression baseline, and serves historical championship
-probabilities through an API and dashboard.
+This is a full-stack project that uses historical NBA data to estimate each
+team's chance of winning the championship.
 
-Live app: https://nba-championship-probability-engine.vercel.app
+Live site: https://nba-championship-probability-engine.vercel.app
 
-## Technology
+## Built With
 
 - React and Vite
-- FastAPI and SQLAlchemy
-- scikit-learn
+- FastAPI
+- Python and scikit-learn
 - `nba_api`
-- SQLite locally and PostgreSQL through `DATABASE_URL`
-- Docker Compose
+- PostgreSQL
+- Docker
 
-## Model
+## How It Works
 
-The baseline uses regular-season statistics only. It trains on 1984-85 through
-2006-07, validates on 2007-08 through 2010-11, and tests on 2011-12 through
-2024-25.
+The project collects real NBA regular-season data and uses a logistic
+regression model to rank teams for each season.
 
-Final test results:
+The model was trained on seasons from 1984-85 through 2006-07. Seasons from
+2007-08 through 2010-11 were used for validation, and seasons from 2011-12
+through 2024-25 were used for testing.
+
+Test results:
 
 - Log loss: 1.740
 - Brier score: 0.767
-- Top-1 champion accuracy: 50.0%
-- Top-3 champion inclusion: 85.7%
+- Top predicted team won 50% of the test seasons
+- The real champion was in the top three 85.7% of the time
 
-These are historical holdout results, not future guarantees or betting advice.
+The predictions are based on historical data and are not guaranteed.
 
-## Run Locally
+## Run With Docker
 
 ```powershell
 docker compose up --build
 ```
 
-Or run each service:
+The frontend will run at `http://localhost:5173` and the backend will run at
+`http://localhost:8000`.
+
+## Run Without Docker
+
+Backend:
 
 ```powershell
 cd backend
@@ -44,40 +51,28 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+Frontend:
+
 ```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-Backend tests:
+## Deployment Variables
 
-```powershell
-cd backend
-pip install -r requirements-dev.txt
-pytest
-```
-
-## Deployment
-
-Deploy `backend` to Railway and `frontend` to Vercel.
-
-Railway variables:
+Railway:
 
 - `DATABASE_URL`
 - `FRONTEND_URL`
 - `ENVIRONMENT=production`
 
-Vercel variable:
+Vercel:
 
 - `VITE_API_URL`
 
-The backend Docker image includes only the small model and prediction files
-needed at runtime. Raw API responses, generated training datasets, databases,
-credentials, and local environment files are not committed.
+## Current Limitations
 
-## Limitations
-
-Predictions cover completed historical seasons through 2024-25. The model uses
-a small regular-season feature set and does not account for injuries, roster
-changes, transactions, or in-season context.
+The app currently shows predictions for completed seasons through 2024-25.
+The model does not include injuries, trades, roster changes, or other
+in-season information.
